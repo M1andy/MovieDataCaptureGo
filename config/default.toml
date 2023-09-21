@@ -1,0 +1,49 @@
+[main]
+mode = "fetch"
+source_directory = "jav_download"
+success_output_directory = "jav_output"
+failed_output_directory = "jav_failed"
+failed_move = true
+
+[actor]
+actor_gender = "female"
+
+[download_files]
+poster = true
+nfo = true
+thumb = true
+fanart = true
+extra_fanart = true
+trailer = true
+
+[download_files.thumb_watermark]
+switch = true
+position = "UpperLeft"
+
+[translation]
+switch = true
+engine = "google-free"
+target_language = "zh_cn"
+text = ["title", "outline"]
+
+[proxy]
+switch = false
+type = "socks5h"
+host = "127.0.0.1"
+port = "7890"
+timeout = 30
+retry = 3
+
+[rename_rule]
+location_rule = ""
+file_rule = ""
+rename_img_with_number = true
+
+[update]
+update_check = true
+
+[logger]
+level = "debug"
+log_path = "./"
+
+
