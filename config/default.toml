@@ -1,7 +1,7 @@
 [main]
 mode = "fetch"
-source_directory = "jav_download"
-success_output_directory = "jav_output"
+source_directory = "F:\\Download\\JAV\\JAV_output"
+success_output_directory = "F:\\Download\\JAV\\JAV_output"
 failed_output_directory = "jav_failed"
 failed_move = true
 
@@ -27,10 +27,8 @@ target_language = "zh_cn"
 text = ["title", "outline"]
 
 [proxy]
-switch = false
-type = "socks5h"
-host = "127.0.0.1"
-port = "7890"
+switch = true
+url = ["http://127.0.0.1:7890"]
 timeout = 30
 retry = 3
 
@@ -44,6 +42,4 @@ update_check = true
 
 [logger]
 level = "debug"
-log_path = "./"
-
-
+log_path = "./mdc_log"
