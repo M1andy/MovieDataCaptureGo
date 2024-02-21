@@ -40,12 +40,10 @@ type Translation struct {
 	Text           []string `toml:"text"`
 }
 type Proxy struct {
-	Switch  bool   `toml:"switch"`
-	Type    string `toml:"type"`
-	Host    string `toml:"host"`
-	Port    string `toml:"port"`
-	Timeout int    `toml:"timeout"`
-	Retry   int    `toml:"retry"`
+	Switch  bool     `toml:"switch"`
+	URL     []string `toml:"url"`
+	Timeout int      `toml:"timeout"`
+	Retry   int      `toml:"retry"`
 }
 type RenameRule struct {
 	LocationRule        string `toml:"location_rule"`
