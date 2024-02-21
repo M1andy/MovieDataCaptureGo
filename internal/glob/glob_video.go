@@ -3,7 +3,6 @@ package glob
 import (
 	cfg "MovieDataCaptureGo/internal/config"
 	. "MovieDataCaptureGo/internal/logger"
-	_ "github.com/mattn/go-sqlite3"
 	"os"
 	"path"
 	"path/filepath"
