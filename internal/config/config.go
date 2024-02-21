@@ -8,11 +8,6 @@ import (
 
 var CFG *Config
 
-var cfgPath = []string{
-	"~/.mdc/config.toml",
-	"./config.toml",
-}
-
 func determineConfigPath() (p string, err error) {
 	for _, p := range cfgPath {
 		_, err := os.Stat(p)
