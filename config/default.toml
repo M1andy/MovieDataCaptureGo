@@ -1,7 +1,7 @@
 [main]
 mode = "fetch"
-source_directory = "F:\\Download\\JAV\\JAV_output"
-success_output_directory = "F:\\Download\\JAV\\JAV_output"
+source_directory = "E:\\nnn\\JAV\\JAV_output"
+success_output_directory = "E:\\nnn\\JAV\\JAV_output"
 failed_output_directory = "jav_failed"
 failed_move = true
 
@@ -28,7 +28,7 @@ text = ["title", "outline"]
 
 [proxy]
 switch = true
-url = ["http://127.0.0.1:7890"]
+url = ["socks5://127.0.0.1:7890"]
 timeout = 30
 retry = 3
 
@@ -42,4 +42,4 @@ update_check = true
 
 [logger]
 level = "debug"
-log_path = "./mdc_log"
+log_path = "./mdc_go_log"

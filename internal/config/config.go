@@ -2,11 +2,17 @@ package config
 
 import (
 	"fmt"
-	toml "github.com/pelletier/go-toml/v2"
 	"os"
+
+	"github.com/pelletier/go-toml/v2"
 )
 
 var CFG *Config
+var cfgPath = []string{
+	"~/.mdc_go/config.toml",
+	"./config.toml",
+	"./config/default.toml",
+}
 
 func determineConfigPath() (p string, err error) {
 	for _, p := range cfgPath {

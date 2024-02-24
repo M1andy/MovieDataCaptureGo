@@ -8,7 +8,7 @@ type Config struct {
 	Proxy         Proxy         `toml:"proxy"`
 	RenameRule    RenameRule    `toml:"rename_rule"`
 	Update        Update        `toml:"update"`
-	Logger        Logger        `toml:"logger"`
+	LoggerOptions LoggerOptions `toml:"logger"`
 }
 type Main struct {
 	Mode                   string `toml:"mode"`
@@ -53,7 +53,7 @@ type RenameRule struct {
 type Update struct {
 	UpdateCheck bool `toml:"update_check"`
 }
-type Logger struct {
+type LoggerOptions struct {
 	Level   string `toml:"level"`
 	LogPath string `toml:"log_path"`
 }
