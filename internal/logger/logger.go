@@ -1,16 +1,20 @@
 package logger
 
 import (
-	"MovieDataCaptureGo/internal/config"
 	"bytes"
 	"fmt"
-	"github.com/sirupsen/logrus"
 	"io"
 	"os"
 	"path"
+
+	"github.com/gocolly/colly/v2/debug"
+	"github.com/sirupsen/logrus"
+
+	"MovieDataCaptureGo/internal/config"
 )
 
 var Logger *logrus.Logger
+var crawlDebugLogger *logrus.Logger
 
 const (
 	red    = 31
@@ -20,8 +24,19 @@ const (
 )
 
 type LogFormatter struct{}
+type CrawlLogger struct {
+	logger *logrus.Logger
+}
 
-// Format 实现Formatter(entry *logrus.Entry) ([]byte, error)接口
+// TODO fix crawl logger memory leak
+func (l CrawlLogger) Init() error {
+	l.logger = setupCrawlDebugLogger(config.CFG)
+	return nil
+}
+func (l CrawlLogger) Event(e *debug.Event) {
+	l.logger.Debugf("collecter: %d || request: %d || type: %s || %q\n", e.CollectorID, e.RequestID, e.Type, e.Values)
+}
+
 func (t *LogFormatter) Format(entry *logrus.Entry) ([]byte, error) {
 	//根据不同的level去展示颜色
 	var levelColor int
@@ -58,8 +73,9 @@ func (t *LogFormatter) Format(entry *logrus.Entry) ([]byte, error) {
 func setupLogger(cfg *config.Config) *logrus.Logger {
 	// init new logger
 	Logger := logrus.New()
+
 	var logLevel logrus.Level
-	switch cfg.Logger.Level {
+	switch cfg.LoggerOptions.Level {
 	case "debug":
 		logLevel = logrus.DebugLevel
 	case "info":
@@ -77,12 +93,12 @@ func setupLogger(cfg *config.Config) *logrus.Logger {
 
 	// set log writers
 	var writers []io.Writer
-	err := os.MkdirAll(cfg.Logger.LogPath, 0666)
+	err := os.MkdirAll(cfg.LoggerOptions.LogPath, 0666)
 	if err != nil {
 		fmt.Printf("cannot create log directory: %v\n", err)
 	}
 	file, err := os.OpenFile(
-		fmt.Sprintf("%s/mdc.log", cfg.Logger.LogPath),
+		fmt.Sprintf("%s/mdc.log", cfg.LoggerOptions.LogPath),
 		os.O_CREATE|os.O_WRONLY|os.O_APPEND,
 		0666)
 	if err != nil {
@@ -96,6 +112,50 @@ func setupLogger(cfg *config.Config) *logrus.Logger {
 	Logger.SetOutput(fileAndStdoutWriter)
 
 	return Logger
+}
+
+func setupCrawlDebugLogger(cfg *config.Config) *logrus.Logger {
+	// init new logger
+	crawlDebugLogger := logrus.New()
+
+	var logLevel logrus.Level
+	switch cfg.LoggerOptions.Level {
+	case "debug":
+		logLevel = logrus.DebugLevel
+	case "info":
+		logLevel = logrus.InfoLevel
+	case "warn":
+		logLevel = logrus.WarnLevel
+	default:
+		logLevel = logrus.InfoLevel
+	}
+	// set log level
+	crawlDebugLogger.SetLevel(logLevel)
+
+	// set log formatter
+	crawlDebugLogger.SetFormatter(&LogFormatter{})
+
+	// set log writers
+	var writers []io.Writer
+	err := os.MkdirAll(cfg.LoggerOptions.LogPath, 0666)
+	if err != nil {
+		fmt.Printf("cannot create log directory: %v\n", err)
+	}
+	file, err := os.OpenFile(
+		fmt.Sprintf("%s/mdc.log", cfg.LoggerOptions.LogPath),
+		os.O_CREATE|os.O_WRONLY|os.O_APPEND,
+		0666)
+	if err != nil {
+		fmt.Printf("create log file error: %v\n", err)
+		writers = append(writers, os.Stdout)
+	} else {
+		writers = append(writers, os.Stdout)
+		writers = append(writers, file)
+	}
+	fileAndStdoutWriter := io.MultiWriter(writers...)
+	crawlDebugLogger.SetOutput(fileAndStdoutWriter)
+
+	return crawlDebugLogger
 }
 
 func init() {
