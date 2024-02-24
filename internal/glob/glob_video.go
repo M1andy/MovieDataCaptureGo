@@ -1,15 +1,15 @@
 package glob
 
 import (
-	cfg "MovieDataCaptureGo/internal/config"
-	. "MovieDataCaptureGo/internal/logger"
 	"os"
 	"path"
 	"path/filepath"
 	"regexp"
+
+	. "MovieDataCaptureGo/internal/logger"
 )
 
-var supportVideoExt = []string{
+var supportedVideoExt = []string{
 	".mp4",
 	".mkv",
 	".avi",
@@ -18,8 +18,7 @@ var supportVideoExt = []string{
 	".flv",
 }
 
-var JAVVideoList []string
-var FilesList []string
+var filesList []string
 
 func globFunc(p string, info os.FileInfo, err error) error {
 	if err != nil {
@@ -29,41 +28,31 @@ func globFunc(p string, info os.FileInfo, err error) error {
 	if info.IsDir() {
 		return nil
 	}
-	FilesList = append(FilesList, p)
+	ext := path.Ext(p)
+	if !extOK(ext) {
+		return nil
+	}
+
+	baseName := path.Base(p)
+	if baseNameOK(baseName) {
+		filesList = append(filesList, p)
+		Logger.Debugln("Found video: ", p)
+	}
+
 	return nil
 }
 
-func VideoFiles(c *cfg.Config) {
-	srcDir := c.Main.SourceDirectory
+func JAVFiles(srcDir string) ([]string, error) {
 	err := filepath.Walk(srcDir, globFunc)
 	if err != nil {
-		Logger.Debugln(err)
+		return nil, err
 	}
-	err = filterVideo()
-	if err != nil {
-		Logger.Debugln(err)
-	}
-	Logger.Infof("Found %d videos under %s", len(JAVVideoList), srcDir)
-}
-
-func filterVideo() error {
-	for _, p := range FilesList {
-		ext := path.Ext(p)
-		if !extOK(ext) {
-			continue
-		}
-
-		baseName := path.Base(p)
-		if baseNameOK(baseName) {
-			JAVVideoList = append(JAVVideoList, p)
-			Logger.Debugln("Found video: ", p)
-		}
-	}
-	return nil
+	Logger.Infof("Found %d videos under %s", len(filesList), srcDir)
+	return filesList, err
 }
 
 func extOK(ext string) bool {
-	for _, s := range supportVideoExt {
+	for _, s := range supportedVideoExt {
 		if ext == s {
 			return true
 		}
