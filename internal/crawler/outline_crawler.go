@@ -1,17 +1,18 @@
 package crawler
 
 import (
-	. "MovieDataCaptureGo/internal/logger"
 	"fmt"
-	"github.com/gocolly/colly/v2"
 	"time"
+
+	"github.com/gocolly/colly/v2"
+
+	. "MovieDataCaptureGo/internal/logger"
 )
 
 type OutlineInfo struct {
 	Title   string
 	outline string
 }
-
 type AirwikiCrawler struct {
 	domains string
 	crawler *colly.Collector

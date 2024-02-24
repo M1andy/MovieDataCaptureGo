@@ -1,10 +1,12 @@
 package crawler
 
 import (
-	. "MovieDataCaptureGo/internal/logger"
 	"fmt"
-	"github.com/gocolly/colly/v2"
 	"strings"
+
+	"github.com/gocolly/colly/v2"
+
+	. "MovieDataCaptureGo/internal/logger"
 )
 
 type JavbusCrawler struct {
@@ -13,6 +15,9 @@ type JavbusCrawler struct {
 }
 
 func NewJavbusCrawlerFactory(domains string) *JavbusCrawler {
+	if domains == "" {
+		domains = "www.javbus.com"
+	}
 	c := javbusCrawlerFactory(domains)
 	return &JavbusCrawler{domains: domains, crawler: c}
 }
@@ -20,6 +25,7 @@ func NewJavbusCrawlerFactory(domains string) *JavbusCrawler {
 func javbusCrawlerFactory(domains string) *colly.Collector {
 	c := crawlerFactory(domains)
 
+	setupJavbusErrorCallbacks(c)
 	setupJavbusXmlCallbacks(c)
 	setupJavbusHtmlCallbacks(c)
 	setupJavbusRequestsCallbacks(c)
@@ -35,23 +41,15 @@ func (f JavbusCrawler) CrawlNumber(number string) error {
 	return nil
 }
 
-type JavbusMovieInfo struct {
-	Number      string
-	ReleaseDate string
-	VideoLength string
-	Director    string
-	Studio      string
-	Label       string
-	Series      string
-	Genre       []string
-	Actors      []string
+func setupJavbusErrorCallbacks(c *colly.Collector) {
+
 }
 
 func setupJavbusXmlCallbacks(c *colly.Collector) {
 	// TODO this on xml function only works if the movie does not have a director subsection
 	// such as https://www.javbus.com/OFJE-377
 	c.OnXML("/html/body/div[5]/div[1]/div[2]", func(e *colly.XMLElement) {
-		info := &JavbusMovieInfo{}
+		info := &JAVInfo{}
 
 		info.Number = e.ChildText("p[1]/span[2]")
 		info.ReleaseDate = e.ChildText("p[2]/text()")
@@ -85,11 +83,14 @@ func setupJavbusXmlCallbacks(c *colly.Collector) {
 }
 
 func setupJavbusHtmlCallbacks(c *colly.Collector) {
-
 }
 
 func setupJavbusRequestsCallbacks(c *colly.Collector) {
-
+	// TODO read cookie from config or something.
+	cookie := ""
+	c.OnRequest(func(r *colly.Request) {
+		r.Headers.Set("cookie", cookie)
+	})
 }
 
 func setupJavbusResponseCallbacks(c *colly.Collector) {
