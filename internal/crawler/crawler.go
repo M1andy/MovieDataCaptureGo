@@ -36,8 +36,9 @@ func setupCommonCallbacks(c *colly.Collector) {
 }
 
 type JAVInfo struct {
-	Title       string
 	Number      string
+	FilePath    string
+	Title       string
 	ReleaseDate string
 	VideoLength string
 	Director    string

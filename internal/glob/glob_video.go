@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"regexp"
 
+	"MovieDataCaptureGo/internal/crawler"
 	. "MovieDataCaptureGo/internal/logger"
 )
 
@@ -18,31 +19,45 @@ var supportedVideoExt = []string{
 	".flv",
 }
 
-var filesList []string
+var filesList []crawler.JAVInfo
 
 func globFunc(p string, info os.FileInfo, err error) error {
 	if err != nil {
-		Logger.Debugln(err)
 		return err
 	}
+
+	// filter directory
 	if info.IsDir() {
 		return nil
 	}
-	ext := path.Ext(p)
-	if !extOK(ext) {
+
+	// check file extension
+	fileExt := path.Ext(p)
+	if !extOK(fileExt) {
 		return nil
 	}
 
-	baseName := path.Base(p)
-	if baseNameOK(baseName) {
-		filesList = append(filesList, p)
-		Logger.Debugln("Found video: ", p)
+	// check file size, must larger than 300MB
+	fileSize := info.Size()
+	if fileSize <= 314572800 {
+		return nil
 	}
+
+	// check fileName
+	fileName := info.Name()
+	fileNameWithoutExt := fileName[0 : len(fileName)-len(fileExt)]
+	if !isJavNumber(fileNameWithoutExt) {
+		return nil
+	}
+
+	// append to fileList
+	filesList = append(filesList, crawler.JAVInfo{Number: fileNameWithoutExt, FilePath: p})
+	Logger.Debugf("Found: %s | Path: %s \n", fileNameWithoutExt, p)
 
 	return nil
 }
 
-func JAVFiles(srcDir string) ([]string, error) {
+func JAVFiles(srcDir string) ([]crawler.JAVInfo, error) {
 	err := filepath.Walk(srcDir, globFunc)
 	if err != nil {
 		return nil, err
@@ -60,18 +75,18 @@ func extOK(ext string) bool {
 	return false
 }
 
-func baseNameOK(baseName string) (ok bool) {
+func isJavNumber(baseName string) (ok bool) {
 	// may add more check method
 	return checkBaseNameUsingRegexp(baseName)
 }
 
-func checkBaseNameUsingRegexp(baseName string) (ok bool) {
-	javMatch, err := regexp.MatchString("[A-Za-z]+-[0-9]+", baseName)
+func checkBaseNameUsingRegexp(fileName string) (ok bool) {
+	javMatch, err := regexp.MatchString("[A-Za-z]+-[0-9]+(-c|-C|)", fileName)
 	if err != nil {
 		Logger.Debugln(err)
 		return false
 	}
-	fc2Match, err := regexp.MatchString("FC2+-[0-9]+", baseName)
+	fc2Match, err := regexp.MatchString("FC2+(-PPV|)-[0-9]+", fileName)
 	if err != nil {
 		Logger.Debugln(err)
 		return false
